@@ -2,9 +2,12 @@ import torch
 import numpy as np
 import time
 from snake import Snake
+import tqdm
+from model import BasicLinearModel
 
 BOARD_SIZE = (40, 40)
 MAX_ITERATION_WITHOUT_REWARD = 100
+N_EPOCHS = 100
 
 
 def train_epoch(model):
@@ -24,5 +27,9 @@ def train_epoch(model):
 
         new_score = game.get_score()
 
-    
     return score
+
+
+model = BasicLinearModel(BOARD_SIZE[0], BOARD_SIZE[1], 4)
+for i in tqdm(range(N_EPOCHS)):
+    train_epoch(model)
