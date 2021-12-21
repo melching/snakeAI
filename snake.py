@@ -1,15 +1,9 @@
 # import numpy as np
 import random
 import pygame
+import numpy as np
 
 class Snake:
-    '''
-    0  = empty
-    1  = snake body
-    2  = snake head
-    3  = apple
-    '''
-
     def __init__(self,x_dim, y_dim, render=True):
         self.render = render
 
@@ -97,7 +91,22 @@ class Snake:
             self.empty.append(self.snake_body[-1])
             self.snake_body = self.snake_body[:-1]
 
-        self.draw_board()
+        if self.render:
+            self.draw_board()
+
+    def get_board_as_numpy(self, dtype=np.uint8):
+        '''
+        0  = empty
+        1  = snake body
+        2  = snake head
+        3  = apple
+        '''
+        board = np.zeros(shape=(self.x_dim, self.y_dim), dtype=dtype)
+        board[self.snake_body[1:]] = 1
+        board[self.snake_body[0]]  = 2
+        board[self.apple]          = 3
+
+        return board
 
     def draw_board(self,):
         assert self.render == True, "Draw has been calles while render is False!"
