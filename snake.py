@@ -51,9 +51,9 @@ class Snake:
 
     def move(self, direction):
         '''
-        0 = up
-        1 = right
-        2 = down
+        0 = up,
+        1 = right,
+        2 = down,
         3 = left
         '''
         assert self.state is not "failed", "Can't move, Game already ended!"
@@ -108,6 +108,13 @@ class Snake:
 
         return board
 
+    def get_score(self,):
+        return len(self.snake_body)
+
+    def quit_gui(self,):
+        if self.render:
+            pygame.quit()
+
     def draw_board(self,):
         assert self.render == True, "Draw has been calles while render is False!"
 
@@ -150,7 +157,7 @@ class Snake:
         )
 
         # show score
-        pygame.display.set_caption('snakeAI - Current Score: ' + str(len(self.snake_body)))
+        pygame.display.set_caption('snakeAI - Current Score: ' + str(self.get_score()))
 
         # update window
         pygame.display.update()
