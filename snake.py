@@ -46,6 +46,7 @@ class Snake:
         assert (x,y) not in self.snake_body
         self.empty.append(self.apple)
         self.apple = (x,y)
+        self.empty.remove(self.apple)
         if self.render:
             self.draw_board()
 
