@@ -85,8 +85,9 @@ class Snake:
 
         # check if next pos is empty
         elif nextpos in self.empty:
-            # move snake
+            # move snake head
             self.snake_body.insert(0,nextpos)
+            self.empty.remove(self.snake_body[0])
             # remove last pos
             self.empty.append(self.snake_body[-1])
             self.snake_body = self.snake_body[:-1]
@@ -94,7 +95,7 @@ class Snake:
         if self.render:
             self.draw_board()
 
-    def get_board_as_numpy(self, dtype=np.uint8):
+    def get_board_as_numpy(self,add_border=False, dtype=np.uint8):
         '''
         0  = empty
         1  = snake body
@@ -105,6 +106,11 @@ class Snake:
         board[self.snake_body[1:]] = 1
         board[self.snake_body[0]]  = 2
         board[self.apple]          = 3
+        
+        if add_border:
+            new_board = np.zeros(shape=(self.x_dim+1, self.y_dim+1), dtype=dtype) - 1
+            new_board[1:-1,1:-1] = board
+            board = new_board
 
         return board
 
