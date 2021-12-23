@@ -22,7 +22,7 @@ class Snake:
 
         if self.render:
             pygame.init()
-            self.screen = pygame.display.set_mode((800,800))
+            self.screen = pygame.display.set_mode((600,600))
             self.draw_board()
 
     def init_state(self, x_dim, y_dim):
@@ -58,6 +58,7 @@ class Snake:
         3 = left
         '''
         assert self.state is not "failed", "Can't move, Game already ended!"
+        assert direction in [0,1,2,3], "Invalid Direction!"
 
         diff_x = 0
         diff_y = 0
@@ -97,23 +98,23 @@ class Snake:
             self.draw_board()
 
     def get_board_as_numpy(self,add_border=False, dtype=np.uint8):
-        '''
+        ''' might be different now
         0  = empty
         1  = snake body
         2  = snake head
         3  = apple
         '''
         board = np.zeros(shape=(self.x_dim, self.y_dim), dtype=dtype)
-        board[self.snake_body[1:]] = 1
-        board[self.snake_body[0]]  = 2
-        board[self.apple]          = 3
+        board[tuple(self.snake_body[1:])] = -1
+        board[self.snake_body[0]]  = -2
+        board[self.apple]          = 1
         
         if add_border:
-            new_board = np.zeros(shape=(self.x_dim+1, self.y_dim+1), dtype=dtype) - 1
+            new_board = np.zeros(shape=(self.x_dim+2, self.y_dim+2), dtype=dtype) - 3
             new_board[1:-1,1:-1] = board
             board = new_board
 
-        return board
+        return board.transpose(0,1)
 
     def get_score(self,):
         return len(self.snake_body)
