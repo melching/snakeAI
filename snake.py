@@ -97,7 +97,7 @@ class Snake:
         if self.render:
             self.draw_board()
 
-    def get_board_as_numpy(self,add_border=False, dtype=np.uint8):
+    def get_board_as_numpy(self, add_border=False, add_danger=False, as_cat=False, dtype=np.uint32):
         ''' might be different now
         0  = empty
         1  = snake body
@@ -105,19 +105,41 @@ class Snake:
         3  = apple
         '''
         board = np.zeros(shape=(self.x_dim, self.y_dim), dtype=dtype)
-        board[tuple(self.snake_body[1:])] = -1
-        board[self.snake_body[0]]  = -2
-        board[self.apple]          = 1
+        if len(self.snake_body) > 1:
+            board[[b[0] for b in self.snake_body[1:]],[b[1] for b in self.snake_body[1:]]] = 1
+        board[self.snake_body[0]]  = 2
+        board[self.apple]          = 3
         
         if add_border:
-            new_board = np.zeros(shape=(self.x_dim+2, self.y_dim+2), dtype=dtype) - 3
+            new_board = np.zeros(shape=(self.x_dim+2, self.y_dim+2), dtype=dtype) + 4
             new_board[1:-1,1:-1] = board
             board = new_board
 
-        return board.transpose(0,1)
+        if as_cat:
+            n_cats = 4 if not add_border else 5
+            board = np.eye(n_cats)[board.astype(np.int32)].astype(dtype)
+            board = board.transpose(2,0,1) # channel first
+
+        if add_danger:
+            danger = np.zeros(shape=(4), dtype=dtype)
+            # check top
+            if self.snake_body[0][1]-1 == -1         or self.snake_body[0][1]-1 in self.snake_body:
+                danger[0] = 1
+            # check bottom
+            if self.snake_body[0][1]+1 == self.y_dim or self.snake_body[0][1]+1 in self.snake_body:
+                danger[2] = 1
+            # check right
+            if self.snake_body[0][0]+1 == self.x_dim or self.snake_body[0][0]+1 in self.snake_body:
+                danger[1] = 1
+            # check left
+            if self.snake_body[0][0]-1 == -1         or self.snake_body[0][0]-1 in self.snake_body:
+                danger[3] = 1
+            return board, danger
+
+        return board
 
     def get_score(self,):
-        return len(self.snake_body)
+        return len(self.snake_body) - 1
 
     def quit_gui(self,):
         if self.render:
