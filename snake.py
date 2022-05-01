@@ -103,6 +103,7 @@ class Snake:
         1  = snake body
         2  = snake head
         3  = apple
+        4  = border (if add_border==True)
         '''
         board = np.zeros(shape=(self.x_dim, self.y_dim), dtype=dtype)
         if len(self.snake_body) > 1:

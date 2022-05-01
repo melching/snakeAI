@@ -18,8 +18,9 @@ import matplotlib.pyplot as plt
 from snake import Snake
 
 # Game settings
-BOARD_SIZE = (10, 10)
+BOARD_SIZE = (7, 7)
 ADD_BORDER = False
+VALUE_DIM = 4 if not ADD_BORDER else 5
 
 PLOT_EVERY = 100
 
@@ -29,12 +30,12 @@ GAMMA = 0.8
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 400
-LR = .01
+LR = .001
 TARGET_UPDATE = 10
 
-N_EPOCHS = 1000
+N_EPOCHS = 10000
 
-device = torch.device("cpu")
+device = torch.device("cuda:0")
 if PLOT_EVERY:
     plt.ion()
     fig = plt.figure()
@@ -120,8 +121,9 @@ def train_epoch(policy_net, target_net, optimizer, memory):
 def train(n_epochs):
     # init models and memory
     border = 2 if ADD_BORDER else 0
-    policy_net = BasicLinearModel(BOARD_SIZE[0]+border, BOARD_SIZE[1]+border, 4).to(device)
-    target_net = BasicLinearModel(BOARD_SIZE[0]+border, BOARD_SIZE[1]+border, 4).to(device)
+
+    policy_net = BasicLinearModel(BOARD_SIZE[0]+border, BOARD_SIZE[1]+border, VALUE_DIM, 4).to(device)
+    target_net = BasicLinearModel(BOARD_SIZE[0]+border, BOARD_SIZE[1]+border, VALUE_DIM, 4).to(device)
     target_net.load_state_dict(policy_net.state_dict())
     target_net.eval()
 
@@ -136,10 +138,12 @@ def train(n_epochs):
         
         # get board state
         current_state, current_danger = game.get_board_as_numpy(add_border=ADD_BORDER, add_danger=True, as_cat=True, dtype=np.float32)
-        current_state, current_danger = torch.from_numpy(current_state).unsqueeze(0), torch.from_numpy(current_danger).unsqueeze(0)
+        current_state, current_danger = torch.from_numpy(current_state).unsqueeze(0).to(device), \
+                                        torch.from_numpy(current_danger).unsqueeze(0).to(device)
 
         for t in count():
             # select an action
+            # print(current_state.shape, current_danger.shape)
             action = select_action(policy_net, current_state, current_danger, steps_done)
             steps_done += 1
 
@@ -157,7 +161,8 @@ def train(n_epochs):
 
             # Observe new state
             next_state, next_danger = game.get_board_as_numpy(add_border=ADD_BORDER, add_danger=True, as_cat=True, dtype=np.float32)
-            next_state, next_danger = torch.from_numpy(next_state).unsqueeze(0), torch.from_numpy(next_danger).unsqueeze(0)
+            next_state, next_danger = torch.from_numpy(next_state).unsqueeze(0).to(device), \
+                                      torch.from_numpy(next_danger).unsqueeze(0).to(device)
             if done:
                 next_state = None
 
